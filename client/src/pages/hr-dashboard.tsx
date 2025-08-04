@@ -23,8 +23,12 @@ export default function HRDashboard() {
   const [departmentFilter, setDepartmentFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
 
-  const { data: leaveRequests = [], isLoading } = useQuery<LeaveRequest[]>({
+  const { data: leaveRequests = [], isLoading, error } = useQuery<LeaveRequest[]>({
     queryKey: ["/api/leave-requests", "all"],
+    retry: 3,
+    retryDelay: 1000,
+    staleTime: 30000, // 30 seconds
+    enabled: !!user,
   });
 
   const approveMutation = useMutation({

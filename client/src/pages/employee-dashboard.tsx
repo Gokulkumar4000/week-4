@@ -15,8 +15,12 @@ export default function EmployeeDashboard() {
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [statusFilter, setStatusFilter] = useState<string>("all");
 
-  const { data: leaveRequests = [], isLoading } = useQuery<LeaveRequest[]>({
+  const { data: leaveRequests = [], isLoading, error } = useQuery<LeaveRequest[]>({
     queryKey: ["/api/leave-requests", "my-requests"],
+    retry: 3,
+    retryDelay: 1000,
+    staleTime: 30000, // 30 seconds
+    enabled: !!user,
   });
 
   const filteredRequests = leaveRequests.filter(request => {

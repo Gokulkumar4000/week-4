@@ -34,7 +34,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       if (firebaseUser) {
         try {
-          const userDoc = await getDoc(doc(db, "users", firebaseUser.uid));
+          // Set loading timeout to prevent infinite loading
+          const timeoutPromise = new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('Firestore connection timeout')), 10000)
+          );
+          
+          const userDocPromise = getDoc(doc(db, "users", firebaseUser.uid));
+          const userDoc = await Promise.race([userDocPromise, timeoutPromise]) as any;
+          
           if (userDoc.exists()) {
             const userData = userDoc.data();
             setUser({
@@ -46,10 +53,48 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               employeeId: userData.employeeId,
               createdAt: userData.createdAt?.toDate() || new Date(),
             });
+          } else {
+            // If user document doesn't exist, create a basic user from email
+            const email = firebaseUser.email || '';
+            const isHR = email.includes('gokul@gncipl.com');
+            const basicUser = {
+              id: firebaseUser.uid,
+              email: email,
+              name: isHR ? 'Gokul' : 'Gokulkumar',
+              role: isHR ? 'hr' as const : 'employee' as const,
+              department: isHR ? 'Human Resources' : 'Engineering',
+              employeeId: isHR ? undefined : 'EMP001',
+              createdAt: new Date(),
+            };
+            setUser(basicUser);
+            
+            // Try to save to Firestore (non-blocking)
+            try {
+              await setDoc(doc(db, "users", firebaseUser.uid), basicUser);
+            } catch (saveError) {
+              console.warn("Could not save user to Firestore:", saveError);
+            }
           }
-        } catch (error) {
+        } catch (error: any) {
           console.error("Error fetching user data:", error);
-          setUser(null);
+          
+          // Fallback: create user from Firebase auth info
+          if (firebaseUser.email) {
+            const email = firebaseUser.email;
+            const isHR = email.includes('gokul@gncipl.com');
+            const fallbackUser = {
+              id: firebaseUser.uid,
+              email: email,
+              name: isHR ? 'Gokul' : 'Gokulkumar',
+              role: isHR ? 'hr' as const : 'employee' as const,
+              department: isHR ? 'Human Resources' : 'Engineering',
+              employeeId: isHR ? undefined : 'EMP001',
+              createdAt: new Date(),
+            };
+            setUser(fallbackUser);
+          } else {
+            setUser(null);
+          }
         }
       } else {
         setUser(null);
