@@ -21,10 +21,10 @@ export default function Setup() {
       // Sample employees data
       const employees = [
         {
-          email: 'john.doe@company.com',
-          password: 'password123',
+          email: 'gokulkumar@gncipl.com',
+          password: 'week-4',
           userData: {
-            name: 'John Doe',
+            name: 'Gokulkumar',
             role: 'employee' as const,
             department: 'Engineering',
             employeeId: 'EMP001',
@@ -44,10 +44,10 @@ export default function Setup() {
 
       // Sample HR user
       const hrUser = {
-        email: 'sarah.wilson@company.com',
-        password: 'password123',
+        email: 'gokul@gncipl.com',
+        password: 'week-4-hr',
         userData: {
-          name: 'Sarah Wilson',
+          name: 'Gokul',
           role: 'hr' as const,
           department: 'Human Resources',
         }
@@ -88,10 +88,10 @@ export default function Setup() {
       // Create sample leave requests
       const sampleRequests = [
         {
-          employeeEmail: 'john.doe@company.com',
+          employeeEmail: 'gokulkumar@gncipl.com',
           request: {
             employeeId: 'EMP001',
-            employeeName: 'John Doe',
+            employeeName: 'Gokulkumar',
             department: 'Engineering',
             leaveType: 'annual' as const,
             fromDate: '2024-12-25',
@@ -103,17 +103,17 @@ export default function Setup() {
           }
         },
         {
-          employeeEmail: 'john.doe@company.com',
+          employeeEmail: 'gokulkumar@gncipl.com',
           request: {
             employeeId: 'EMP001',
-            employeeName: 'John Doe',
+            employeeName: 'Gokulkumar',
             department: 'Engineering',
             leaveType: 'sick' as const,
             fromDate: '2024-12-10',
             toDate: '2024-12-12',
             reason: 'Fever and flu symptoms',
             status: 'approved' as const,
-            approvedBy: 'Sarah Wilson',
+            approvedBy: 'Gokul',
             submittedAt: new Date('2024-12-09'),
             updatedAt: new Date('2024-12-10'),
           }
@@ -215,9 +215,9 @@ export default function Setup() {
               <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
                 <h3 className="font-semibold text-yellow-900 mb-2">Test Credentials:</h3>
                 <div className="space-y-1 text-sm text-yellow-800">
-                  <div><strong>Employee 1:</strong> john.doe@company.com / password123</div>
+                  <div><strong>Employee:</strong> gokulkumar@gncipl.com / week-4</div>
                   <div><strong>Employee 2:</strong> alice.smith@company.com / password123</div>
-                  <div><strong>HR Manager:</strong> sarah.wilson@company.com / password123</div>
+                  <div><strong>HR Manager:</strong> gokul@gncipl.com / week-4-hr</div>
                 </div>
               </div>
 
