@@ -45,8 +45,25 @@ export const getQueryFn: <T>(options: {
 }) => QueryFunction<T> =
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
+    const headers: Record<string, string> = {};
+    
+    // Add Firebase auth token if available
+    if (typeof window !== 'undefined') {
+      try {
+        const { auth } = await import('./firebase');
+        if (auth.currentUser) {
+          const token = await auth.currentUser.getIdToken();
+          headers.Authorization = `Bearer ${token}`;
+          headers['user-id'] = auth.currentUser.uid;
+        }
+      } catch (error) {
+        console.warn('Could not add auth headers:', error);
+      }
+    }
+
     const res = await fetch(queryKey.join("/") as string, {
       credentials: "include",
+      headers,
     });
 
     if (unauthorizedBehavior === "returnNull" && res.status === 401) {

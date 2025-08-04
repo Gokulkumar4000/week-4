@@ -33,90 +33,14 @@ export class MemStorage implements IStorage {
   }
 
   private initializeTestData() {
-    // Create test users
-    const employee1: User = {
-      id: "emp1",
-      email: "john.doe@company.com",
-      name: "John Doe",
-      role: "employee",
-      department: "Engineering",
-      employeeId: "EMP001",
-      createdAt: new Date("2024-01-01"),
-    };
-
-    const employee2: User = {
-      id: "emp2",
-      email: "alice.smith@company.com",
-      name: "Alice Smith",
-      role: "employee",
-      department: "Marketing",
-      employeeId: "EMP002",
-      createdAt: new Date("2024-01-01"),
-    };
-
-    const hrUser: User = {
-      id: "hr1",
-      email: "sarah.wilson@company.com",
-      name: "Sarah Wilson",
-      role: "hr",
-      department: "Human Resources",
-      createdAt: new Date("2024-01-01"),
-    };
-
-    this.users.set(employee1.id, employee1);
-    this.users.set(employee2.id, employee2);
-    this.users.set(hrUser.id, hrUser);
-
-    // Create test leave requests
-    const request1: LeaveRequest = {
-      id: "req1",
-      userId: employee1.id,
-      employeeId: "EMP001",
-      employeeName: "John Doe",
-      department: "Engineering",
-      leaveType: "annual",
-      fromDate: "2024-12-25",
-      toDate: "2024-12-29",
-      reason: "Family vacation during holidays",
-      status: "pending",
-      submittedAt: new Date("2024-12-15"),
-      updatedAt: new Date("2024-12-15"),
-    };
-
-    const request2: LeaveRequest = {
-      id: "req2",
-      userId: employee1.id,
-      employeeId: "EMP001",
-      employeeName: "John Doe",
-      department: "Engineering",
-      leaveType: "sick",
-      fromDate: "2024-12-10",
-      toDate: "2024-12-12",
-      reason: "Fever and flu symptoms",
-      status: "approved",
-      approvedBy: "Sarah Wilson",
-      submittedAt: new Date("2024-12-09"),
-      updatedAt: new Date("2024-12-10"),
-    };
-
-    const request3: LeaveRequest = {
-      id: "req3",
-      userId: employee2.id,
-      employeeId: "EMP002",
-      employeeName: "Alice Smith",
-      department: "Marketing",
-      leaveType: "personal",
-      fromDate: "2024-12-18",
-      toDate: "2024-12-20",
-      reason: "Personal matters",
-      status: "pending",
-      submittedAt: new Date("2024-12-16"),
-      updatedAt: new Date("2024-12-16"),
-    };
-
-    this.leaveRequests.set(request1.id, request1);
-    this.leaveRequests.set(request2.id, request2);
-    this.leaveRequests.set(request3.id, request3);
+    // Initialize empty - users will be created dynamically from Firebase auth
+    // Create some sample leave requests with placeholder user IDs that will be updated
+    this.createSampleLeaveRequests();
+  }
+  
+  private createSampleLeaveRequests() {
+    // These will be created when users login and their Firebase UIDs are known
+    // For now, keep empty to avoid mismatched user IDs
   }
 
   // User methods
@@ -129,14 +53,55 @@ export class MemStorage implements IStorage {
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    const id = randomUUID();
     const user: User = {
       ...insertUser,
-      id,
       createdAt: new Date(),
     };
-    this.users.set(id, user);
+    this.users.set(insertUser.id, user);
+    
+    // Create sample leave requests for this user if it's one of our test accounts
+    this.createSampleDataForUser(user);
+    
     return user;
+  }
+
+  private createSampleDataForUser(user: User) {
+    if (user.email === "gokulkumar@gncipl.com" && user.role === "employee") {
+      // Create sample leave requests for employee
+      const request1: LeaveRequest = {
+        id: `req-${user.id}-1`,
+        userId: user.id,
+        employeeId: user.employeeId || "EMP001",
+        employeeName: user.name,
+        department: user.department || "Engineering",
+        leaveType: "annual",
+        fromDate: "2024-12-25",
+        toDate: "2024-12-29",
+        reason: "Family vacation during holidays",
+        status: "pending",
+        submittedAt: new Date("2024-12-15"),
+        updatedAt: new Date("2024-12-15"),
+      };
+
+      const request2: LeaveRequest = {
+        id: `req-${user.id}-2`,
+        userId: user.id,
+        employeeId: user.employeeId || "EMP001",
+        employeeName: user.name,
+        department: user.department || "Engineering",
+        leaveType: "sick",
+        fromDate: "2024-12-10",
+        toDate: "2024-12-12",
+        reason: "Fever and flu symptoms",
+        status: "approved",
+        approvedBy: "Gokul",
+        submittedAt: new Date("2024-12-09"),
+        updatedAt: new Date("2024-12-10"),
+      };
+
+      this.leaveRequests.set(request1.id, request1);
+      this.leaveRequests.set(request2.id, request2);
+    }
   }
 
   // Leave request methods

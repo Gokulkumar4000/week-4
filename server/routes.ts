@@ -4,7 +4,47 @@ import { z } from "zod";
 import { storage } from "./storage";
 import { insertLeaveRequestSchema, updateLeaveRequestSchema } from "@shared/schema";
 
+// User auto-creation middleware
+async function ensureUserExists(userId: string, authToken?: string) {
+  let user = await storage.getUser(userId);
+  if (!user) {
+    // Determine user role and details based on known test accounts
+    const isEmployee = userId.includes("gokulkumar") || authToken?.includes("gokulkumar");
+    const isHR = userId.includes("gokul@gncipl") || authToken?.includes("gokul@gncipl");
+    
+    // Default user creation with fallback role detection
+    const userData = {
+      id: userId,
+      email: isEmployee ? "gokulkumar@gncipl.com" : isHR ? "gokul@gncipl.com" : `user-${userId}@company.com`,
+      name: isEmployee ? "Gokulkumar" : isHR ? "Gokul" : "User",
+      role: isEmployee ? "employee" as const : isHR ? "hr" as const : "employee" as const,
+      department: isEmployee ? "Engineering" : isHR ? "Human Resources" : "General",
+      employeeId: isEmployee ? "EMP001" : undefined,
+    };
+    
+    user = await storage.createUser(userData);
+    console.log(`Created new user: ${user.email} (${user.role})`);
+  }
+  return user;
+}
+
 export async function registerRoutes(app: Express): Promise<Server> {
+  // User profile route
+  app.get("/api/user/profile", async (req, res) => {
+    try {
+      const userId = req.headers["user-id"] as string;
+      if (!userId) {
+        return res.status(400).json({ message: "User ID is required" });
+      }
+      
+      const user = await ensureUserExists(userId, req.headers.authorization as string);
+      res.json(user);
+    } catch (error) {
+      console.error("Error fetching user profile:", error);
+      res.status(500).json({ message: "Failed to fetch user profile" });
+    }
+  });
+
   // Setup route to initialize Firebase data
   app.post("/api/setup", async (req, res) => {
     try {
@@ -37,6 +77,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!userId) {
         return res.status(400).json({ message: "User ID is required" });
       }
+      
+      // Ensure user exists before fetching requests
+      await ensureUserExists(userId, req.headers.authorization as string);
       
       const requests = await storage.getUserLeaveRequests(userId);
       res.json(requests);
